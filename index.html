@@ -180,6 +180,61 @@
 
     .logout:hover { background: rgba(255,255,255,0.35); }
 
+    .text-me {
+      position: fixed;
+      bottom: 5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.95);
+      padding: 1rem 1.25rem;
+      border-radius: 14px;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 90vw;
+    }
+
+    .text-me input {
+      border: 2px solid #eaeaea;
+      border-radius: 8px;
+      padding: 0.55rem 0.8rem;
+      font-size: 0.95rem;
+      outline: none;
+      width: 180px;
+    }
+
+    .text-me input:focus { border-color: #a29bfe; }
+
+    .text-me button {
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1.1rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff6b6b, #a29bfe);
+      font-size: 0.95rem;
+    }
+
+    .text-me button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .text-me .status {
+      flex-basis: 100%;
+      text-align: center;
+      font-size: 0.85rem;
+      color: #555;
+      min-height: 1em;
+    }
+
+    .text-me .status.ok    { color: #1dd1a1; }
+    .text-me .status.err   { color: #e74c3c; }
+
     .confetti {
       position: fixed;
       width: 10px;
@@ -217,6 +272,13 @@
   </div>
 
   <button class="logout" id="logoutBtn" style="display:none">Sign out</button>
+
+  <form class="text-me" id="textMeForm">
+    <input id="phone" type="tel" inputmode="tel" placeholder="Your phone number" required />
+    <button type="submit" id="textMeBtn">Text me</button>
+    <div class="status" id="textMeStatus"></div>
+  </form>
+
   <p class="hint" id="hint" style="display:none">click anywhere for confetti</p>
 
   <script>
@@ -229,19 +291,23 @@
     const logoutBtn = document.getElementById("logoutBtn");
     const errorEl   = document.getElementById("loginError");
 
+    const textMeForm = document.getElementById("textMeForm");
+
     function showApp() {
-      loginCard.style.display = "none";
-      stage.style.display     = "block";
-      hint.style.display      = "block";
-      logoutBtn.style.display = "inline-block";
+      loginCard.style.display   = "none";
+      stage.style.display       = "block";
+      hint.style.display        = "block";
+      logoutBtn.style.display   = "inline-block";
+      textMeForm.style.display  = "flex";
     }
 
     function showLogin() {
-      loginCard.style.display = "block";
-      stage.style.display     = "none";
-      hint.style.display      = "none";
-      logoutBtn.style.display = "none";
-      errorEl.textContent     = "";
+      loginCard.style.display   = "block";
+      stage.style.display       = "none";
+      hint.style.display        = "none";
+      logoutBtn.style.display   = "none";
+      textMeForm.style.display  = "none";
+      errorEl.textContent       = "";
     }
 
     if (sessionStorage.getItem(SESSION_KEY) === "yes") showApp();
@@ -266,11 +332,44 @@
       showLogin();
     });
 
+    // Text me — sends the page's main greeting to the typed phone number
+    const textMeBtn    = document.getElementById("textMeBtn");
+    const textMeStatus = document.getElementById("textMeStatus");
+
+    textMeForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const phone = document.getElementById("phone").value.trim();
+      textMeStatus.className = "status";
+      textMeStatus.textContent = "Sending…";
+      textMeBtn.disabled = true;
+      try {
+        const resp = await fetch("/api/text", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone, message: "Hello World!" }),
+        });
+        const json = await resp.json();
+        if (json.success) {
+          textMeStatus.className = "status ok";
+          textMeStatus.textContent = "Sent! Check your phone.";
+        } else {
+          textMeStatus.className = "status err";
+          textMeStatus.textContent = "Failed: " + (json.error || "unknown error");
+        }
+      } catch (err) {
+        textMeStatus.className = "status err";
+        textMeStatus.textContent = "Network error: " + err.message;
+      } finally {
+        textMeBtn.disabled = false;
+      }
+    });
+
     // Confetti — only when logged in
     const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#a29bfe', '#ffeaa7', '#fd79a8'];
     document.addEventListener('click', (e) => {
       if (stage.style.display !== "block") return;
       if (e.target === logoutBtn) return;
+      if (textMeForm.contains(e.target)) return;
       for (let i = 0; i < 40; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti';
