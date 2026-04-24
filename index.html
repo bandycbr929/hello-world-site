@@ -20,7 +20,6 @@
       background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1, #ff9ff3, #a29bfe);
       background-size: 400% 400%;
       animation: gradientShift 15s ease infinite;
-      cursor: pointer;
     }
 
     @keyframes gradientShift {
@@ -29,11 +28,86 @@
       100% { background-position: 0% 50%; }
     }
 
+    /* ---------- Login screen ---------- */
+    .login-card {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2.5rem 3rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+      width: min(90vw, 380px);
+      text-align: center;
+    }
+
+    .login-card h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.25rem;
+      background: linear-gradient(135deg, #ff6b6b, #a29bfe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .login-card p.subtitle {
+      color: #666;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .login-card label {
+      display: block;
+      text-align: left;
+      font-size: 0.85rem;
+      color: #444;
+      margin: 0.75rem 0 0.35rem;
+      font-weight: 600;
+    }
+
+    .login-card input {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border: 2px solid #eaeaea;
+      border-radius: 10px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .login-card input:focus {
+      border-color: #a29bfe;
+    }
+
+    .login-card button {
+      width: 100%;
+      margin-top: 1.25rem;
+      padding: 0.8rem;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, #ff6b6b, #a29bfe);
+      box-shadow: 0 8px 20px rgba(162, 155, 254, 0.4);
+      transition: transform 0.15s;
+    }
+
+    .login-card button:hover { transform: translateY(-2px); }
+    .login-card button:active { transform: translateY(0); }
+
+    .login-error {
+      margin-top: 0.75rem;
+      color: #e74c3c;
+      font-size: 0.85rem;
+      min-height: 1em;
+    }
+
+    /* ---------- Main stage (shown after login) ---------- */
     .stage {
       text-align: center;
       color: white;
       text-shadow: 0 4px 20px rgba(0,0,0,0.3);
       user-select: none;
+      display: none;
     }
 
     h1 {
@@ -48,17 +122,17 @@
       animation: wave 2.5s ease-in-out infinite;
     }
 
-    h1 span:nth-child(1)  { animation-delay: 0.0s; color: #fff; }
-    h1 span:nth-child(2)  { animation-delay: 0.1s; color: #fff; }
-    h1 span:nth-child(3)  { animation-delay: 0.2s; color: #fff; }
-    h1 span:nth-child(4)  { animation-delay: 0.3s; color: #fff; }
-    h1 span:nth-child(5)  { animation-delay: 0.4s; color: #fff; }
-    h1 span:nth-child(7)  { animation-delay: 0.6s; color: #fff; }
-    h1 span:nth-child(8)  { animation-delay: 0.7s; color: #fff; }
-    h1 span:nth-child(9)  { animation-delay: 0.8s; color: #fff; }
-    h1 span:nth-child(10) { animation-delay: 0.9s; color: #fff; }
-    h1 span:nth-child(11) { animation-delay: 1.0s; color: #fff; }
-    h1 span:nth-child(12) { animation-delay: 1.1s; color: #fff; }
+    h1 span:nth-child(1)  { animation-delay: 0.0s; }
+    h1 span:nth-child(2)  { animation-delay: 0.1s; }
+    h1 span:nth-child(3)  { animation-delay: 0.2s; }
+    h1 span:nth-child(4)  { animation-delay: 0.3s; }
+    h1 span:nth-child(5)  { animation-delay: 0.4s; }
+    h1 span:nth-child(7)  { animation-delay: 0.6s; }
+    h1 span:nth-child(8)  { animation-delay: 0.7s; }
+    h1 span:nth-child(9)  { animation-delay: 0.8s; }
+    h1 span:nth-child(10) { animation-delay: 0.9s; }
+    h1 span:nth-child(11) { animation-delay: 1.0s; }
+    h1 span:nth-child(12) { animation-delay: 1.1s; }
 
     @keyframes wave {
       0%, 100% { transform: translateY(0) rotate(0deg); }
@@ -90,6 +164,22 @@
       text-transform: uppercase;
     }
 
+    .logout {
+      position: fixed;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: rgba(255,255,255,0.2);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.5);
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      backdrop-filter: blur(6px);
+    }
+
+    .logout:hover { background: rgba(255,255,255,0.35); }
+
     .confetti {
       position: fixed;
       width: 10px;
@@ -100,7 +190,24 @@
   </style>
 </head>
 <body>
-  <div class="stage">
+  <!-- Login -->
+  <div class="login-card" id="loginCard">
+    <h2>Welcome</h2>
+    <p class="subtitle">Sign in to see the magic</p>
+    <form id="loginForm" autocomplete="off">
+      <label for="username">Username</label>
+      <input id="username" name="username" type="text" autofocus />
+
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" />
+
+      <button type="submit">Sign in</button>
+      <div class="login-error" id="loginError"></div>
+    </form>
+  </div>
+
+  <!-- Main content (hidden until login) -->
+  <div class="stage" id="stage">
     <h1 aria-label="Hello World">
       <span>H</span><span>e</span><span>l</span><span>l</span><span>o</span>
       <span>&nbsp;</span>
@@ -109,17 +216,66 @@
     <p class="tagline">made with a lot of color and a little bit of joy</p>
   </div>
 
-  <p class="hint">click anywhere for confetti</p>
+  <button class="logout" id="logoutBtn" style="display:none">Sign out</button>
+  <p class="hint" id="hint" style="display:none">click anywhere for confetti</p>
 
   <script>
-    const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#a29bfe', '#ffeaa7', '#fd79a8'];
+    const USERS = { "Brendan": "pass" };
+    const SESSION_KEY = "hello-world-auth";
 
+    const loginCard = document.getElementById("loginCard");
+    const stage     = document.getElementById("stage");
+    const hint      = document.getElementById("hint");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const errorEl   = document.getElementById("loginError");
+
+    function showApp() {
+      loginCard.style.display = "none";
+      stage.style.display     = "block";
+      hint.style.display      = "block";
+      logoutBtn.style.display = "inline-block";
+    }
+
+    function showLogin() {
+      loginCard.style.display = "block";
+      stage.style.display     = "none";
+      hint.style.display      = "none";
+      logoutBtn.style.display = "none";
+      errorEl.textContent     = "";
+    }
+
+    if (sessionStorage.getItem(SESSION_KEY) === "yes") showApp();
+
+    document.getElementById("loginForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const u = document.getElementById("username").value.trim();
+      const p = document.getElementById("password").value;
+      if (USERS[u] && USERS[u] === p) {
+        sessionStorage.setItem(SESSION_KEY, "yes");
+        errorEl.textContent = "";
+        showApp();
+      } else {
+        errorEl.textContent = "Invalid username or password";
+      }
+    });
+
+    logoutBtn.addEventListener("click", () => {
+      sessionStorage.removeItem(SESSION_KEY);
+      document.getElementById("username").value = "";
+      document.getElementById("password").value = "";
+      showLogin();
+    });
+
+    // Confetti — only when logged in
+    const colors = ['#ff6b6b', '#feca57', '#48dbfb', '#1dd1a1', '#ff9ff3', '#a29bfe', '#ffeaa7', '#fd79a8'];
     document.addEventListener('click', (e) => {
+      if (stage.style.display !== "block") return;
+      if (e.target === logoutBtn) return;
       for (let i = 0; i < 40; i++) {
         const piece = document.createElement('div');
         piece.className = 'confetti';
         piece.style.left = e.clientX + 'px';
-        piece.style.top = e.clientY + 'px';
+        piece.style.top  = e.clientY + 'px';
         piece.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
         document.body.appendChild(piece);
 
