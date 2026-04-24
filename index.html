@@ -336,8 +336,19 @@
     const textMeBtn    = document.getElementById("textMeBtn");
     const textMeStatus = document.getElementById("textMeStatus");
 
+    const TEXT_ME_KEY = "hello-world-texted";
+
+    function lockTextMe() {
+      textMeBtn.disabled = true;
+      textMeBtn.textContent = "Already sent";
+      document.getElementById("phone").disabled = true;
+    }
+
+    if (localStorage.getItem(TEXT_ME_KEY) === "yes") lockTextMe();
+
     textMeForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+      if (localStorage.getItem(TEXT_ME_KEY) === "yes") return;
       const phone = document.getElementById("phone").value.trim();
       textMeStatus.className = "status";
       textMeStatus.textContent = "Sending…";
@@ -350,16 +361,18 @@
         });
         const json = await resp.json();
         if (json.success) {
+          localStorage.setItem(TEXT_ME_KEY, "yes");
           textMeStatus.className = "status ok";
           textMeStatus.textContent = "Sent! Check your phone.";
+          lockTextMe();
         } else {
           textMeStatus.className = "status err";
           textMeStatus.textContent = "Failed: " + (json.error || "unknown error");
+          textMeBtn.disabled = false;
         }
       } catch (err) {
         textMeStatus.className = "status err";
         textMeStatus.textContent = "Network error: " + err.message;
-      } finally {
         textMeBtn.disabled = false;
       }
     });
